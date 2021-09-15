@@ -1,18 +1,25 @@
 import MeetupDetail from "../../../components/meetups/MeetupDetail";
 import {useRouter} from 'next/router';
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { route } from "next/dist/next-server/server/router";
 import { useState } from "react";
 import {MongoClient,ObjectId} from 'mongodb'
-
+import Head from 'next/head';
 
 const MeetupDetails = ({meetupData}) => {
     return (
+
+        <Fragment>
+          <Head>
+            <title>{meetupData.title}</title>
+            <meta name='description' content={meetupData.description}/>
+          </Head>
           <MeetupDetail 
           image = {meetupData.image} 
           title = {meetupData.title} 
           address = {meetupData.address}
           description = {meetupData.description}/>
+        </Fragment>
     )
 }
 
