@@ -18,7 +18,7 @@ const HomePage = ({meetups}) => {
 }
 
 export async function getStaticProps(){
-    const client = await MongoClient.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority`)
+    const client = await MongoClient.connect(`mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority`)
     const db = client.db();
     const meetupsCollection = db.collection('meetups');
     let meetups = await meetupsCollection.find({}).toArray();
