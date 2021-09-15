@@ -1,44 +1,49 @@
 import { Fragment } from 'react';
 import Head from 'next/head';
-import MeetupList from '../components/meetups/MeetupList'
 import { MongoClient } from 'mongodb';
 
+import MeetupList from '../components/meetups/MeetupList';
 
-const HomePage = ({meetups}) => {
-    return (
-        <Fragment>
-        <Head>
-            <meta name='viewport' charset='utf-8' content='width=device-width' initialScale='1.0'/>
-            <meta name ='description' content='Browse a Huge Selection of Meetups!'/>
-            <title> React Meetups </title>
-        </Head>
-            <MeetupList meetups={meetups}/>
-        </Fragment>
-    )
-}
-
-export async function getStaticProps(){
-    const client = await MongoClient.connect(`mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority`)
-    const db = client.db();
-    const meetupsCollection = db.collection('meetups');
-    let meetups = await meetupsCollection.find({}).toArray();
-    client.close();
-    return {    
-        props: {
-            meetups:meetups.map(meetup => ({
-                id:meetup._id.toString(),
-                title:meetup.title,
-                address:meetup.address,
-                image:meetup.image,
-                description:meetup.description
-            }
-                ))
-        },
-        // this allows us to regenerate page so that we dont have outdated data
-        revalidate: 10
-    } 
+function HomePage(props) {
+  return (
+    <Fragment>
+      <Head>
+        <title>React Meetups</title>
+        <meta
+          name='description'
+          content='Browse a huge list of highly active React meetups!'
+        />
+      </Head>
+      <MeetupList meetups={props.meetups} />
+    </Fragment>
+  );
 }
 
 
+export async function getStaticProps() {
+  // fetch data from an API
+  const client = await MongoClient.connect(
+    'mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority'
+  );
+  const db = client.db();
+
+  const meetupsCollection = db.collection('meetups');
+
+  const meetups = await meetupsCollection.find().toArray();
+
+  client.close();
+
+  return {
+    props: {
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
+    },
+    revalidate: 1,
+  };
+}
 
 export default HomePage;

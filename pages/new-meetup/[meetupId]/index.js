@@ -1,71 +1,75 @@
-import MeetupDetail from "../../../components/meetups/MeetupDetail";
-import {useRouter} from 'next/router';
-import { Fragment, useEffect } from "react";
-import { route } from "next/dist/next-server/server/router";
-import { useState } from "react";
-import {MongoClient,ObjectId} from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb';
+import { Fragment } from 'react';
 import Head from 'next/head';
 
-const MeetupDetails = ({meetupData}) => {
-    return (
+import MeetupDetail from '../../../components/meetups/MeetupDetail'
 
-        <Fragment>
-          <Head>
-            <title>{meetupData.title}</title>
-            <meta name='description' content={meetupData.description}/>
-          </Head>
-          <MeetupDetail 
-          image = {meetupData.image} 
-          title = {meetupData.title} 
-          address = {meetupData.address}
-          description = {meetupData.description}/>
-        </Fragment>
-    )
+function MeetupDetails(props) {
+  return (
+    <Fragment>
+      <Head>
+        <title>{props.meetupData.title}</title>
+        <meta name='description' content={props.meetupData.description} />
+      </Head>
+      <MeetupDetail
+        image={props.meetupData.image}
+        title={props.meetupData.title}
+        address={props.meetupData.address}
+        description={props.meetupData.description}
+      />
+    </Fragment>
+  );
 }
 
 export async function getStaticPaths() {
-    const client = await MongoClient.connect(`mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority`)
-    const db = client.db()
-    const meetupsCollection = db.collection('meetups')
-    const meetups = await meetupsCollection.find({},{_id:1}).toArray();
-    return {
-        fallback: true,
-        paths: meetups.map(meetup => ({params: {
-            meetupId:meetup._id.toString()
-        }
-    })
-    )
-    }
+  const client = await MongoClient.connect(
+    'mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority'
+  );
+  const db = client.db();
+
+  const meetupsCollection = db.collection('meetups');
+
+  const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+
+  client.close();
+
+  return {
+    fallback: 'blocking',
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
+  };
 }
+
 export async function getStaticProps(context) {
-    // fetch data for a single meetup
-  
-    const meetupId = context.params.meetupId;
-  
-    const client = await MongoClient.connect(
-      `mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority`
-    );
-    const db = client.db();
-  
-    const meetupsCollection = db.collection('meetups');
-  
-    const selectedMeetup = await meetupsCollection.findOne({
-      _id: ObjectId(meetupId),
-    });
-  
-    client.close();
-  
-    return {
-      props: {
-        meetupData: {
-          id: selectedMeetup._id.toString(),
-          title: selectedMeetup.title,
-          address: selectedMeetup.address,
-          image: selectedMeetup.image,
-          description: selectedMeetup.description,
-        },
+  // fetch data for a single meetup
+
+  const meetupId = context.params.meetupId;
+
+  const client = await MongoClient.connect(
+    'mongodb+srv://anthony:Anthony23@cluster0.vncnm.mongodb.net/meetups?retryWrites=true&w=majority'
+  );
+  const db = client.db();
+
+  const meetupsCollection = db.collection('meetups');
+
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: ObjectId(meetupId),
+  });
+
+  client.close();
+
+  return {
+    props: {
+      meetupData: {
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
       },
-    };
-  }
+    },
+  };
+}
 
 export default MeetupDetails;
